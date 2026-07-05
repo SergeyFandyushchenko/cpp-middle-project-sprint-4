@@ -1,31 +1,17 @@
-#include <unistd.h>
-
-#include <algorithm>
-#include <array>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <filesystem>
-#include <fstream>
-#include <functional>
-#include <iomanip>
-#include <iostream>
-#include <print>
-#include <ranges>
-#include <sstream>
-#include <string>
-#include <variant>
-#include <vector>
+#pragma once
 
 #include "file.hpp"
 #include "function.hpp"
 #include "metric.hpp"
 #include "metric_accumulator.hpp"
 
+#include <algorithm>
+#include <ranges>
+#include <string>
+#include <vector>
+
 namespace analyzer {
 
-namespace rv = std::ranges::views;
-namespace rs = std::ranges;
 /**
  * @brief Анализирует список Python-файлов и извлекает метрики для всех функций и методов.
  *
@@ -40,11 +26,25 @@ namespace rs = std::ranges;
  */
 auto AnalyseFunctions(const std::vector<std::string> &files,
                       const analyzer::metric::MetricExtractor &metric_extractor) {
-    // здесь ваш код
+    // Создаем файлы и извлекаем функции
+    auto functions = files |
+                     std::views::transform([](const std::string &filename) { return analyzer::file::File(filename); }) |
+                     std::views::transform([](const analyzer::file::File &file) {
+                         analyzer::function::FunctionExtractor extractor;
+                         return extractor.Get(file);
+                     }) |
+                     std::views::join | std::ranges::to<std::vector<analyzer::function::Function>>();
+
+    // Вычисляем метрики для каждой функции
+    return functions | std::views::transform([&metric_extractor](const analyzer::function::Function &func) {
+               auto metrics = metric_extractor.Get(func);
+               return std::make_pair(func, metrics);
+           }) |
+           std::ranges::to<std::vector>();
 }
 
 /**
- * 
+ *
  * @brief Группирует результаты анализа по классам.
  *
  * Эта функция:
@@ -62,7 +62,10 @@ auto AnalyseFunctions(const std::vector<std::string> &files,
  * действительно исчезают из результата.
  */
 auto SplitByClasses(const auto &analysis) {
-    // здесь ваш код
+    // Фильтруем только методы классов и группируем по классам
+    return analysis | std::views::filter([](const auto &elem) { return elem.first.class_name.has_value(); }) |
+           std::views::chunk_by([](const auto &a, const auto &b) { return a.first.class_name == b.first.class_name; }) |
+           std::ranges::to<std::vector>();
 }
 
 /**
@@ -74,7 +77,10 @@ auto SplitByClasses(const auto &analysis) {
  * - Использует `chunk_by`, поэтому **порядок функций в `analysis` должен быть по файлам**.
  */
 auto SplitByFiles(const auto &analysis) {
-    // здесь ваш код
+    // Группируем по файлам
+    return analysis |
+           std::views::chunk_by([](const auto &a, const auto &b) { return a.first.filename == b.first.filename; }) |
+           std::ranges::to<std::vector>();
 }
 
 /**
@@ -87,7 +93,11 @@ auto SplitByFiles(const auto &analysis) {
  */
 void AccumulateFunctionAnalysis(const auto &analysis,
                                 const analyzer::metric_accumulator::MetricsAccumulator &accumulator) {
-    // здесь ваш код
+    std::ranges::for_each(analysis, [&accumulator](const auto &elem) {
+        if (!elem.second.empty()) {
+            accumulator.AccumulateNextFunctionResults(elem.second);
+        }
+    });
 }
 
 }  // namespace analyzer

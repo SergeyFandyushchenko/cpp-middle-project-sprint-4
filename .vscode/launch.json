@@ -24,7 +24,7 @@
             "program": "${workspaceFolder}/build/src/metric_impl/metric_test",
             "args": [
             ],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/build/src/metric_impl",
             "preLaunchTask": "GCC: Build Debug",
             "initCommands": ["settings set target.disable-aslr false"]
         },
@@ -35,7 +35,7 @@
             "program": "${workspaceFolder}/build/src/metric_accumulator_impl/metric_accumulator_test",
             "args": [
             ],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/build/src/metric_accumulator_impl",
             "preLaunchTask": "GCC: Build Debug",
             "initCommands": ["settings set target.disable-aslr false"]
         }

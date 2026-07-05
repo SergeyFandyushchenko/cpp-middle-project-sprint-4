@@ -1,26 +1,8 @@
 #pragma once
-#include <unistd.h>
 
-#include <algorithm>
-#include <any>
-#include <array>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <filesystem>
-#include <fstream>
-#include <functional>
-#include <iostream>
-#include <ranges>
-#include <sstream>
-#include <string>
-#include <variant>
-#include <vector>
+#include <unordered_map>
 
 #include "metric.hpp"
-
-namespace rv = std::ranges::views;
-namespace rs = std::ranges;
 
 namespace analyzer::metric_accumulator {
 
@@ -41,9 +23,12 @@ struct MetricsAccumulator {
     }
     template <typename Accumulator>
     const Accumulator &GetFinalizedAccumulator(const std::string &metric_name) const {
-        auto metric_accululator = accumulators.at(metric_name);
-        metric_accululator->Finalize();
-        return dynamic_cast<const Accumulator&>(*metric_accululator);
+        auto it = accumulators.find(metric_name);
+        if (it == accumulators.end()) {
+            throw std::runtime_error("Accumulator not found: " + metric_name);
+        }
+        it->second->Finalize();
+        return dynamic_cast<const Accumulator &>(*it->second);
     }
     void AccumulateNextFunctionResults(const std::vector<metric::MetricResult> &metric_results) const;
 
