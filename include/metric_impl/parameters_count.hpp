@@ -1,27 +1,18 @@
-#include <array>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <filesystem>
-#include <fstream>
-#include <functional>
-#include <iostream>
-#include <ranges>
-#include <sstream>
-#include <string>
-#include <variant>
-#include <vector>
+#pragma once
 
 #include "metric.hpp"
 
+#include <string>
+
 namespace analyzer::metric::metric_impl {
 
-struct CountParametersMetric final : public IMetric {
+struct CountParametersMetric final : IMetric {
     static inline const std::string kName = "Parameters count";
 
 protected:
     std::string Name() const override;
 
-    MetricResult::ValueType CalculateImpl(const function::Function& f) const override;};
+    MetricResult::ValueType CalculateImpl(const function::Function &f) const override;
+};
 
 }  // namespace analyzer::metric::metric_impl

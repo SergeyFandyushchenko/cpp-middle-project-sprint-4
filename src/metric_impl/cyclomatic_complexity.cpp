@@ -1,23 +1,11 @@
 #include "metric_impl/cyclomatic_complexity.hpp"
 
-#include <unistd.h>
-
 #include <algorithm>
-#include <array>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <fstream>
-#include <functional>
-#include <iostream>
-#include <ranges>
-#include <sstream>
-#include <string>
-#include <variant>
-#include <vector>
 
 namespace analyzer::metric::metric_impl {
+
 std::string CyclomaticComplexityMetric::Name() const { return kName; }
+
 MetricResult::ValueType CyclomaticComplexityMetric::CalculateImpl(const function::Function &f) const {
     // Получаем строковое представление AST (абстрактного синтаксического дерева) функции.
     // Это S-выражение, сгенерированное утилитой tree-sitter, например:
@@ -44,8 +32,6 @@ MetricResult::ValueType CyclomaticComplexityMetric::CalculateImpl(const function
         "conditional_expression",  // для тернарного оператора
     };
 
-    // === ВАШ КОД ДОЛЖЕН БЫТЬ ЗДЕСЬ ===
-    //
     // Цель: подсчитать, сколько раз в строке `function_ast` встречаются
     // любые из узлов из `complexity_nodes`.
     //
@@ -64,6 +50,16 @@ MetricResult::ValueType CyclomaticComplexityMetric::CalculateImpl(const function
     // сколько раз он встречается в `function_ast`, используя `std::string::find`
     // в цикле (это допустимо, так как вы работаете со строковым представлением AST,
     // а не с исходным кодом напрямую).
+    int count = 0;
+    std::ranges::for_each(complexity_nodes, [&](std::string_view node_type) {
+        size_t pos = 0;
+        while ((pos = function_ast.find(node_type, pos)) != std::string::npos) {
+            count++;
+            pos += node_type.length();
+        }
+    });
 
+    return count + 1;
 }
+
 }  // namespace analyzer::metric::metric_impl

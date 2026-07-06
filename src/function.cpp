@@ -2,27 +2,18 @@
 
 #include <unistd.h>
 
-#include <algorithm>
-#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <filesystem>
-#include <fstream>
-#include <functional>
-#include <iostream>
-#include <ranges>
-#include <sstream>
 #include <string>
-#include <variant>
 #include <vector>
 
 #include "file.hpp"
 #include "utils.hpp"
 
-namespace fs = std::filesystem;
-namespace rv = std::ranges::views;
-namespace rs = std::ranges;
+namespace {
+constexpr int OFFSET_POS_SECOND = 2;  // Смещение позиции второго значения в интервале после ", "
+}
 
 namespace analyzer::function {
 
@@ -73,7 +64,7 @@ FunctionExtractor::FunctionNameLocation FunctionExtractor::GetNameLocation(const
 
     size_t comma = coords.find(',');
     Position start{static_cast<size_t>(ToInt(coords.substr(0, comma))),
-                   static_cast<size_t>(ToInt(coords.substr(comma + 2)))};
+                   static_cast<size_t>(ToInt(coords.substr(comma + OFFSET_POS_SECOND)))};
 
     size_t dash = function_ast.find('[', coord_end);
     size_t end_bracket = function_ast.find(']', dash);
@@ -81,7 +72,7 @@ FunctionExtractor::FunctionNameLocation FunctionExtractor::GetNameLocation(const
 
     comma = end_coords.find(',');
     Position end{static_cast<size_t>(ToInt(end_coords.substr(0, comma))),
-                 static_cast<size_t>(ToInt(end_coords.substr(comma + 2)))};
+                 static_cast<size_t>(ToInt(end_coords.substr(comma + OFFSET_POS_SECOND)))};
 
     return {start, end, ""};
 }
@@ -112,7 +103,7 @@ FunctionExtractor::FindEnclosingClass(const std::string &ast, const FunctionName
 
         size_t comma = coords.find(',');
         Position class_start{static_cast<size_t>(ToInt(coords.substr(0, comma))),
-                             static_cast<size_t>(ToInt(coords.substr(comma + 1)))};
+                             static_cast<size_t>(ToInt(coords.substr(comma + OFFSET_POS_SECOND)))};
 
         size_t dash = ast.find('-', coord_end);
         size_t second_coord_start = ast.find('[', dash);
@@ -121,7 +112,7 @@ FunctionExtractor::FindEnclosingClass(const std::string &ast, const FunctionName
 
         comma = end_coords.find(',');
         Position class_end{static_cast<size_t>(ToInt(end_coords.substr(0, comma))),
-                           static_cast<size_t>(ToInt(end_coords.substr(comma + 1)))};
+                           static_cast<size_t>(ToInt(end_coords.substr(comma + OFFSET_POS_SECOND)))};
 
         if (func_loc.start.line > class_start.line ||
             (func_loc.start.line == class_start.line && func_loc.start.col >= class_start.col)) {

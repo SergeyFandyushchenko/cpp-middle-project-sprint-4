@@ -2,16 +2,11 @@
 
 #include <cstring>
 #include <fstream>
-#include <iostream>
 #include <memory>
-#include <ranges>
 #include <string>
 #include <vector>
 
 namespace analyzer::file {
-
-namespace rv = std::ranges::views;
-namespace rs = std::ranges;
 
 File::File(const std::string &filename) : name{filename} {
     std::ifstream file(name);

@@ -2,5 +2,13 @@
     "files.eol": "\n",
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
-    "clangd.path": "/usr/bin/clangd-20"
+    "clangd.path": "/usr/bin/clangd-20",
+    "cSpell.words": [
+        "Analyse",
+        "occured",
+        "Testnestedif",
+        "цикломатическая",
+        "цикломатическую"
+    ],
+    "cmake.ctest.neverDebugTestsWithLaunchConfiguration": false
 }
